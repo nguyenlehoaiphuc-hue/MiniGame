@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini Game Bắt Cặp - Tăng Trải Nghiệm</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #67B26F, #4ca2cd);
+    color: #fff;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+  }
+  h1 {
+    margin: 20px 0 10px;
+    font-weight: 700;
+  }
+  #game {
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    grid-gap: 15px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #48a868;
+    border-radius: 12px;
+    width: 70px;
+    height: 70px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 40px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    user-select: none;
+    transition: transform 0.3s;
+    position: relative;
+  }
+  .card.flipped, .card.matched {
+    background: #ffcc00;
+    color: #333;
+    cursor: default;
+    transform: rotateY(180deg);
+  }
+  .card.matched {
+    background: #f39c12;
+    box-shadow: 0 0 12px #f39c12;
+  }
+  #info {
+    font-size: 18px;
+    margin-bottom: 30px;
+  }
+  #restartBtn {
+    padding: 10px 25px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #4ca2cd;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transition: background-color 0.3s;
+  }
+  #restartBtn:hover {
+    background-color: #f1c40f;
+    color: #333;
+  }
+  @media (max-width: 400px) {
+    #game {
+      grid-template-columns: repeat(2, 90px);
+      grid-gap: 20px;
+    }
+    .card {
+      width: 90px; height: 90px; font-size: 50px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Mini Game Bắt Cặp</h1>
+<div id="info">Số lượt lật: 0</div>
+<div id="game"></div>
+<button id="restartBtn">Chơi lại</button>
+
+<script>
+  const emojis = ['🍎','🍌','🍓','🍇','🍉','🥝','🍒','🥥'];
+  let cards = [];
+  let flippedCards = [];
+  let matchedCount = 0;
+  let flips = 0;
+
+  const game = document.getElementById('game');
+  const info = document.getElementById('info');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function createCards() {
+    cards = [];
+    flippedCards = [];
+    matchedCount = 0;
+    flips = 0;
+    info.textContent = `Số lượt lật: ${flips}`;
+    game.innerHTML = '';
+
+    let cardEmojis = [...emojis, ...emojis]; // Pair each emoji twice
+    shuffle(cardEmojis);
+
+    cardEmojis.forEach((emoji, index) => {
+        const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.emoji = emoji;
+      card.dataset.index = index;
+      card.textContent = '';
+      card.addEventListener('click', onCardClick);
+      game.appendChild(card);
+      cards.push(card);
+    });
+  }
+
+  function onCardClick(e) {
+    let card = e.currentTarget;
+    if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+      return;
+    }
+    card.classList.add('flipped');
+    card.textContent = card.dataset.emoji;
+    flippedCards.push(card);
+    flips++;
+    info.textContent = `Số lượt lật: ${flips}`;
+
+    if (flippedCards.length === 2) {
+      if (flippedCards[0].dataset.emoji === flippedCards[1].dataset.emoji) {
+        flippedCards.forEach(c => c.classList.add('matched'));
+        matchedCount += 2;
+        flippedCards = [];
+        if (matchedCount === cards.length) {
+          setTimeout(() => alert(`Chúc mừng! Bạn đã hoàn thành trong ${flips} lượt lật.`), 300);
+        }
+      } else {
+        setTimeout(() => {
+          flippedCards.forEach(c => {
+            c.classList.remove('flipped');
+            c.textContent = '';
+          });
+          flippedCards = [];
+        }, 1000);
+      }
+    }
+  }
+
+  restartBtn.addEventListener('click', createCards);
+
+  createCards();
+</script>
+
+</body>
+</html>
