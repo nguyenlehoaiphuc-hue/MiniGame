@@ -66,25 +66,43 @@
   #form-container {
     display: none;
     background: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    margin-top: 20px;
-    max-width: 400px;
+    margin: 20px auto;
+    max-width: 500px;
     width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #form-container h2 {
+    color: #004080;
+    margin-bottom: 15px;
+  }
+  #form-container p {
+    color: #333;
+    margin-bottom: 20px;
   }
   #form-container input {
     display: block;
     width: 100%;
-    padding: 10px;
+    max-width: 400px;
+    padding: 12px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 16px;
+    box-sizing: border-box;
   }
   #form-container button {
     background: #28a745;
     color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
   }
   #form-container button:hover {
     background: #1e7e34;
@@ -147,7 +165,7 @@
     attemptsLeft--;
     if (guess === secretNumber) {
       message.textContent = `🎉 Chúc mừng! Bạn đã đoán đúng số ${secretNumber}!`;
-      formContainer.style.display = 'block';
+      formContainer.style.display = 'flex';
       document.getElementById('game-container').style.display = 'none';
     } else if (attemptsLeft <= 0) {
       message.textContent = `😢 Hết lượt! Số đúng là ${secretNumber}.`;
@@ -169,24 +187,25 @@
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
-    const data = { name, email, phone, game: 'Đoán Số', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
-    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+
+    const formData = new FormData();
+    formData.append('entry.1410113608', new Date().getTime()); // Số thứ tự
+    formData.append('entry.1256122884', name); // Họ tên
+    formData.append('entry.1376561036', phone); // Số điện thoại
+    formData.append('entry.1497839970', 'Đoán Số'); // Kết quả
+
+    fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' }
+      body: formData,
+      mode: 'no-cors'
     })
-    .then(response => response.json())
-    .then(result => {
-      if (result.status === 'success') {
-        alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
-        formContainer.style.display = 'none';
-        startGame();
-      } else {
-        alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
-      }
+    .then(() => {
+      alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+      formContainer.style.display = 'none';
+      startGame();
     })
     .catch(error => {
-      alert('Lỗi kết nối: ' + error.message);
+      alert('Lỗi khi gửi thông tin: ' + error.message);
     });
   }
 
