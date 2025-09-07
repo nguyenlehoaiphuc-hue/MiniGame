@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game 4 - Đoán Chữ Đảo Lộn</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #004080, #00A1D6);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    min-height: 100vh;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: #005f99;
+  }
+  .btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  h1 {
+    margin: 10px 0;
+    font-weight: 700;
+    color: #fff;
+  }
+  p.lead {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  #scrambled, #answer {
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 500px;
+  }
+  .letter {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    border: 2px solid #0077cc;
+    border-radius: 6px;
+    background-color: #0077cc;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.4rem;
+    user-select: none;
+    cursor: grab;
+  }
+  .letter.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+  .slot {
+    width: 44px;
+    height: 44px;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    vertical-align: middle;
+  }
+  #result {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  #form-container {
+    display: none;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin: 20px auto;
+    max-width: 500px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #form-container h2 {
+    color: #004080;
+    margin-bottom: 15px;
+  }
+  #form-container p {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  #form-container input {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  #form-container button {
+    background: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #form-container button:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+  <div class="controls">
+    <a href="index.html" class="btn">⬅ Quay lại menu</a>
+    <button id="changeWordBtn" class="btn">Đổi từ</button>
+    <button id="checkBtn" class="btn">Kiểm tra kết quả</button>
+  </div>
+  <h1>🎲 Game 4: Đoán Chữ Đảo Lộn</h1>
+  <p class="lead">Kéo các chữ cái vào ô trống đúng vị trí để tạo thành từ chính xác.</p>
+  <div id="answer"></div>
+  <div id="scrambled"></div>
+  <div id="result"></div>
+  <div id="form-container">
+    <h2>🎉 Chúc mừng bạn đã thắng!</h2>
+    <p>Vui lòng nhập thông tin để nhận quà:</p>
+    <input type="text" id="name" placeholder="Họ và tên" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Số điện thoại" required>
+    <button id="submitFormBtn" class="btn">Gửi thông tin</button>
+  </div>
+<script>
+  const words = [
+    "TÀIKHOẢN", "LÃISUẤT", "THẺTÍNDỤNG", "VAYVỐN", "TIẾTKIỆM",
+    "CHUYỂNKHOẢN", "ATM", "NGÂNHÀNG", "TÀICHÍNH", "ĐẦUTƯ",
+    "CỔPHIẾU", "TRÁIPHIẾU", "QUỸĐẦUTƯ", "BẢOHIỂM", "TIỀNMẶT",
+    "SỔTIẾTKIỆM", "LÃIKÉP", "TỶGIÁ", "NGOẠITỆ", "VÀNG",
+    "BẠC", "CHOVAY", "NỢXẤU", "TÀISẢN", "NỢPHẢITRẢ",
+    "DOANHTHU", "LỢINHUẬN", "CHIPHÍ", "BÁOCÁO", "KIỂMTOÁN",
+    "QUYĐỊNH", "PHÁPLUẬT", "KHÁCHHÀNG", "DỊCHVỤ", "INTERNETBANKING",
+    "MOBILEBANKING", "THẺGHINỢ", "MÃOTP", "BẢOMẬT", "RỦIRO",
+    "QUẢNLÝ", "CHINHÁNH", "GIAODỊCH", "BIÊNLAI", "HÓAĐƠN",
+    "THUẾ", "PHÍDỊCHVỤ", "LÃISUẤTCỐĐỊNH", "LÃISUẤTTHẢNỔI", "VAYMUANHÀ",
+    "THANHTOÁN"
+  ];
+  let currentWord = words[Math.floor(Math.random() * words.length)];
+  let changeCount = 0;
+  const maxChanges = 3;
+
+  const answerDiv = document.getElementById('answer');
+  const scrambledDiv = document.getElementById('scrambled');
+  const checkBtn = document.getElementById('checkBtn');
+  const changeWordBtn = document.getElementById('changeWordBtn');
+  const resultDiv = document.getElementById('result');
+  const formContainer = document.getElementById('form-container');
+  const submitFormBtn = document.getElementById('submitFormBtn');
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  function initGame() {
+    const letters = currentWord.split('');
+    let scrambledLetters = [...letters];
+    shuffleArray(scrambledLetters);
+
+    answerDiv.innerHTML = '';
+    scrambledDiv.innerHTML = '';
+    resultDiv.textContent = '';
+    formContainer.style.display = 'none';
+    answerDiv.style.display = 'flex';
+    scrambledDiv.style.display = 'flex';
+
+    for (let ch of letters) {
+      const slot = document.createElement('div');
+      slot.classList.add('slot');
+      slot.dataset.correct = ch;
+      slot.addEventListener('dragover', (e) => e.preventDefault());
+      slot.addEventListener('drop', dropHandler);
+      answerDiv.appendChild(slot);
+    }
+
+    for (let ch of scrambledLetters) {
+      const letterDiv = document.createElement('div');
+      letterDiv.classList.add('letter');
+      letterDiv.textContent = ch;
+      letterDiv.draggable = true;
+      letterDiv.addEventListener('dragstart', dragStartHandler);
+      letterDiv.addEventListener('dragend', dragEndHandler);
+      scrambledDiv.appendChild(letterDiv);
+    }
+  }
+
+  let dragged;
+
+  function dragStartHandler(e) {
+    dragged = e.target;
+    e.target.classList.add('dragging');
+  }
+  function dragEndHandler(e) {
+    e.target.classList.remove('dragging');
+  }
+  function dropHandler(e) {
+    e.preventDefault();
+    if (e.target.classList.contains('slot') && !e.target.hasChildNodes()) {
+      e.target.appendChild(dragged);
+    }
+  }
+
+  function checkResult() {
+    let correct = true;
+    const slots = answerDiv.querySelectorAll('.slot');
+    for (let slot of slots) {
+      const ch = slot.dataset.correct;
+      if (!slot.firstChild) {
+        resultDiv.style.color = '#ff0000';
+        resultDiv.textContent = '⚠️ Chưa điền đủ chữ cái vào các ô. Vui lòng kéo đầy đủ!';
+        return;
+      }
+      if (slot.firstChild.textContent !== ch) {
+        correct = false;
+        break;
+      }
+    }
+
+    if (correct) {
+      resultDiv.style.color = '#28a745';
+      resultDiv.textContent = '🎉 Chúc mừng! Bạn đã sắp xếp đúng từ.';
+      formContainer.style.display = 'flex';
+      answerDiv.style.display = 'none';
+      scrambledDiv.style.display = 'none';
+      checkBtn.style.display = 'none';
+      changeWordBtn.style.display = 'none';
+    } else {
+      resultDiv.style.color = '#ff0000';
+      resultDiv.textContent = '❌ Chưa đúng! Hãy thử lại.';
+    }
+  }
+
+  function changeWord() {
+    if (changeCount >= maxChanges) {
+      alert('Bạn đã sử dụng hết số lần đổi từ!');
+      changeWordBtn.disabled = true;
+      return;
+    }
+    changeCount++;
+    currentWord = words[Math.floor(Math.random() * words.length)];
+    initGame();
+    changeWordBtn.textContent = `Đổi từ (${maxChanges - changeCount} lần còn lại)`;
+    if (changeCount >= maxChanges) {
+      changeWordBtn.disabled = true;
+    }
+  }
+
+  function submitForm() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    if (!name || !email || !phone) {
+      alert('Vui lòng điền đầy đủ thông tin!');
+      return;
+    }
+    const data = { name, email, phone, game: 'Đoán Chữ', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
+    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+        formContainer.style.display = 'none';
+        changeCount = 0;
+        changeWordBtn.disabled = false;
+        changeWordBtn.textContent = `Đổi từ (${maxChanges} lần còn lại)`;
+        checkBtn.style.display = 'inline-block';
+        currentWord = words[Math.floor(Math.random() * words.length)];
+        initGame();
+      } else {
+        alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
+      }
+    })
+    .catch(error => {
+      alert('Lỗi kết nối: ' + error.message);
+    });
+  }
+
+  checkBtn.addEventListener('click', checkResult);
+  changeWordBtn.addEventListener('click', changeWord);
+  submitFormBtn.addEventListener('click', submitForm);
+
+  changeWordBtn.textContent = `Đổi từ (${maxChanges} lần còn lại)`;
+  initGame();
+</script>
+</body>
+</html>
