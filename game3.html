@@ -10,18 +10,19 @@
     background: linear-gradient(135deg, #004080, #00A1D6);
     color: #fff;
     margin: 0;
-    padding: 20px;
+    padding: 10px;
     text-align: center;
     min-height: 100vh;
   }
   .controls {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    justify-content: center;
   }
   .btn {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     background: #0077cc;
     color: #fff;
     border: none;
@@ -37,12 +38,13 @@
     margin: 10px 0;
     font-weight: 700;
     color: #fff;
+    font-size: 24px;
   }
   p.lead {
     color: #fff;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   #wrap {
     display: flex;
@@ -52,11 +54,13 @@
   #board {
     display: grid;
     gap: 2px;
-    margin: 20px auto;
+    margin: 15px auto;
     background: #fff;
-    padding: 6px;
+    padding: 4px;
     border-radius: 8px;
-    border: 3px solid #004080;
+    border: 2px solid #004080;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .tile {
     display: inline-block;
@@ -68,67 +72,94 @@
   }
   .tile.dragging {
     opacity: 0.6;
-    outline: 3px solid #28a745;
+    outline: 2px solid #28a745;
   }
   .tile.selected {
-    outline: 3px dashed #ff6600;
+    outline: 2px dashed #ff6600;
   }
   #message {
-    min-height: 32px;
-    margin-top: 16px;
+    min-height: 28px;
+    margin-top: 12px;
     font-weight: 700;
     color: #28a745;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
   #error {
     color: #ff0000;
     font-weight: 700;
-    font-size: 1.2rem;
-    margin-top: 12px;
+    font-size: 1.1rem;
+    margin-top: 10px;
   }
   #form-container {
     display: none;
     background: #fff;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 20px;
+    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    margin: 20px auto;
-    max-width: 500px;
-    width: 90%;
+    margin: 15px auto;
+    max-width: 90%;
+    width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
   #form-container h2 {
     color: #004080;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    font-size: 18px;
   }
   #form-container p {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 14px;
   }
   #form-container input {
     display: block;
     width: 100%;
-    max-width: 400px;
-    padding: 12px;
-    margin: 10px 0;
+    padding: 10px;
+    margin: 8px 0;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 6px;
+    font-size: 14px;
     box-sizing: border-box;
   }
   #form-container button {
     background: #28a745;
     color: #fff;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
   }
   #form-container button:hover {
     background: #1e7e34;
+  }
+  @media (max-width: 400px) {
+    .tile {
+      width: 80px !important;
+      height: 80px !important;
+    }
+    #board {
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      padding: 3px;
+      margin: 10px auto;
+    }
+    .controls {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    p.lead {
+      font-size: 1rem;
+    }
   }
 </style>
 </head>
@@ -179,7 +210,7 @@ img.onload = () => {
     return;
   }
   const minSide = Math.min(naturalW, naturalH);
-  tileSize = Math.floor(minSide / SIZE * 0.6);
+  tileSize = Math.min(Math.floor(minSide / SIZE * 0.6), 100); // Giới hạn tileSize tối đa 100px
   board.style.gridTemplateColumns = `repeat(${SIZE}, ${tileSize}px)`;
   board.style.gridTemplateRows = `repeat(${SIZE}, ${tileSize}px)`;
   initTiles();
@@ -325,7 +356,7 @@ function submitForm() {
   formData.append('entry.1410113608', serial); // Số thứ tự
   formData.append('entry.1256122884', name); // Họ tên
   formData.append('entry.1376561036', phone); // Số điện thoại
-  formData.append('entry.1497839970', 'Ghép Hình'); // Kết quả
+  formData.append('entry.1497839970', 'Thắng'); // Kết quả
 
   fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
     method: 'POST',
