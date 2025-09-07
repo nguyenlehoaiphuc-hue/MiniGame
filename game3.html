@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game 3 - Ghép Hình 3x3</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #004080, #00A1D6);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    min-height: 100vh;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: #005f99;
+  }
+  h1 {
+    margin: 10px 0;
+    font-weight: 700;
+    color: #fff;
+  }
+  p.lead {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  #wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #board {
+    display: grid;
+    gap: 2px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 6px;
+    border-radius: 8px;
+    border: 3px solid #004080;
+  }
+  .tile {
+    display: inline-block;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    background-repeat: no-repeat;
+    background-size: cover;
+    touch-action: manipulation;
+  }
+  .tile.dragging {
+    opacity: 0.6;
+    outline: 3px solid #28a745;
+  }
+  .tile.selected {
+    outline: 3px dashed #ff6600;
+  }
+  #message {
+    min-height: 32px;
+    margin-top: 16px;
+    font-weight: 700;
+    color: #28a745;
+    font-size: 1.2rem;
+  }
+  #error {
+    color: #ff0000;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-top: 12px;
+  }
+  #form-container {
+    display: none;
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    max-width: 400px;
+    width: 90%;
+  }
+  #form-container input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  #form-container button {
+    background: #28a745;
+    color: #fff;
+  }
+  #form-container button:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <div class="controls">
+      <a href="index.html" class="btn">⬅ Quay lại menu</a>
+      <button id="shuffleBtn" class="btn">Trộn lại</button>
+    </div>
+    <h1>🧩 Game 3: Ghép Hình (3×3)</h1>
+    <p class="lead">Kéo thả hoặc chạm hai lần để đổi chỗ các mảnh, ghép đúng sẽ thắng.</p>
+    <div id="board" aria-live="polite"></div>
+    <div id="message"></div>
+    <div id="error"></div>
+    <div id="form-container">
+      <h2>🎉 Chúc mừng bạn đã thắng!</h2>
+      <p>Vui lòng nhập thông tin để nhận quà:</p>
+      <input type="text" id="name" placeholder="Họ và tên" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="tel" id="phone" placeholder="Số điện thoại" required>
+      <button id="submitFormBtn" class="btn">Gửi thông tin</button>
+    </div>
+  </div>
+<script>
+const IMG_SRC = 'images/puzzle.jpg';
+const SIZE = 3;
+const board = document.getElementById('board');
+const message = document.getElementById('message');
+const errorEl = document.getElementById('error');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const formContainer = document.getElementById('form-container');
+const submitFormBtn = document.getElementById('submitFormBtn');
+
+let tileSize = 100;
+let tilesOrder = [];
+let draggedTile = null;
+let selectedTile = null;
+
+const img = new Image();
+img.src = IMG_SRC;
+img.onload = () => {
+  errorEl.textContent = '';
+  const naturalW = img.naturalWidth;
+  const naturalH = img.naturalHeight;
+  const minSide = Math.min(naturalW, naturalH);
+  tileSize = Math.floor(minSide / SIZE * 0.6);
+  board.style.gridTemplateColumns = `repeat(${SIZE}, ${tileSize}px)`;
+  board.style.gridTemplateRows = `repeat(${SIZE}, ${tileSize}px)`;
+  initTiles();
+};
+img.onerror = () => {
+  errorEl.textContent = `Không tìm thấy ảnh "${IMG_SRC}". Hãy kiểm tra tên file và đường dẫn.`;
+};
+
+function initTiles() {
+  const correct = Array.from({length: SIZE * SIZE}, (_, i) => i);
+  tilesOrder = [...correct].sort(() => Math.random() - 0.5);
+  renderBoard();
+  message.textContent = '';
+  formContainer.style.display = 'none';
+  board.style.display = 'grid';
+}
+
+function renderBoard() {
+  board.innerHTML = '';
+  tilesOrder.forEach((originalIndex, positionIndex) => {
+    const row = Math.floor(originalIndex / SIZE);
+    const col = originalIndex % SIZE;
+    const div = document.createElement('div');
+    div.className = 'tile';
+    div.style.width = tileSize + 'px';
+    div.style.height = tileSize + 'px';
+    div.style.backgroundImage = `url(${IMG_SRC})`;
+    div.style.backgroundSize = `${tileSize * SIZE}px ${tileSize * SIZE}px`;
+    div.style.backgroundPosition = `-${col * tileSize}px -${row * tileSize}px`;
+    div.dataset.original = originalIndex;
+    div.dataset.position = positionIndex;
+    div.draggable = true;
+    div.addEventListener('dragstart', onDragStart);
+    div.addEventListener('dragend', onDragEnd);
+    div.addEventListener('dragover', e => e.preventDefault());
+    div.addEventListener('drop', onDrop);
+    div.addEventListener('click', onTileClick);
+    board.appendChild(div);
+  });
+}
+
+function onDragStart(e) {
+  draggedTile = e.currentTarget;
+  draggedTile.classList.add('dragging');
+  try { e.dataTransfer.setData('text/plain', draggedTile.dataset.position); } catch (err) {}
+}
+function onDragEnd(e) {
+  if (draggedTile) draggedTile.classList.remove('dragging');
+  draggedTile = null;
+}
+function onDrop(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  if (!draggedTile || draggedTile === target) return;
+  swapTiles(draggedTile, target);
+  clearSelection();
+  checkWin();
+}
+function onTileClick(e) {
+  const t = e.currentTarget;
+  if (!selectedTile) {
+    selectedTile = t;
+    t.classList.add('selected');
+  } else {
+    if (selectedTile === t) {
+      clearSelection();
+      return;
+    }
+    swapTiles(selectedTile, t);
+    clearSelection();
+    checkWin();
+  }
+}
+function clearSelection() {
+  if (selectedTile) selectedTile.classList.remove('selected');
+  selectedTile = null;
+}
+function swapTiles(a, b) {
+  const aPos = a.style.backgroundPosition;
+  const bPos = b.style.backgroundPosition;
+  const aOrig = a.dataset.original;
+  const bOrig = b.dataset.original;
+  a.style.backgroundPosition = bPos;
+  b.style.backgroundPosition = aPos;
+  a.dataset.original = bOrig;
+  b.dataset.original = aOrig;
+  const posA = parseInt(a.dataset.position, 10);
+  const posB = parseInt(b.dataset.position, 10);
+  [tilesOrder[posA], tilesOrder[posB]] = [tilesOrder[posB], tilesOrder[posA]];
+  a.dataset.position = posA;
+  b.dataset.position = posB;
+}
+function checkWin() {
+  const tiles = Array.from(board.children);
+  let ok = true;
+  tiles.forEach((tile, i) => {
+    if (parseInt(tile.dataset.original, 10) !== i) ok = false;
+  });
+  if (ok) {
+    message.textContent = '🎉 Chúc mừng! Bạn đã hoàn thành bức hình!';
+    formContainer.style.display = 'block';
+    board.style.display = 'none';
+  }
+}
+function submitForm() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  if (!name || !email || !phone) {
+    alert('Vui lòng điền đầy đủ thông tin!');
+    return;
+  }
+  const data = { name, email, phone, game: 'Ghép Hình', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
+  fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.status === 'success') {
+      alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+      formContainer.style.display = 'none';
+      initTiles();
+    } else {
+      alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
+    }
+  })
+  .catch(error => {
+    alert('Lỗi kết nối: ' + error.message);
+  });
+}
+
+shuffleBtn.addEventListener('click', () => {
+  if (!img.complete) {
+    errorEl.textContent = 'Ảnh chưa sẵn sàng.';
+    return;
+  }
+  tilesOrder = tilesOrder.sort(() => Math.random() - 0.5);
+  renderBoard();
+  message.textContent = '';
+});
+submitFormBtn.addEventListener('click', submitForm);
+</script>
+</body>
+</html>
