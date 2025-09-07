@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mini Game - Vietinbank Gia Định</title>
+  <!-- Font Awesome để có icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
@@ -41,6 +42,11 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s;
       cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .game-card:hover {
       transform: translateY(-5px);
@@ -63,22 +69,22 @@
   <h3>✨ MINI GAME ✨</h3>
 
   <div class="game-container">
-    <div class="game-card" onclick="location.href='game1.html'">
+    <a class="game-card" href="game1.html">
       <i class="fa-solid fa-clone"></i>
       <p>Game 1: Bắt Cặp</p>
-    </div>
-    <div class="game-card" onclick="location.href='game2.html'">
+    </a>
+    <a class="game-card" href="game2.html">
       <i class="fa-solid fa-dice"></i>
       <p>Game 2: Đoán Số</p>
-    </div>
-    <div class="game-card" onclick="location.href='game3.html'">
+    </a>
+    <a class="game-card" href="game3.html">
       <i class="fa-solid fa-puzzle-piece"></i>
       <p>Game 3: Ghép Hình</p>
-    </div>
-    <div class="game-card" onclick="location.href='game4.html'">
+    </a>
+    <a class="game-card" href="game4.html">
       <i class="fa-solid fa-circle-notch"></i>
       <p>Game 4: Vòng Quay May Mắn</p>
-    </div>
+    </a>
   </div>
 </body>
 </html>
