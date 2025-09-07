@@ -3,114 +3,109 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini Game Bắt Cặp</title>
+<title>Game 1 - Mini Game Bắt Cặp</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #67B26F, #4ca2cd);
-    color: #fff; margin: 0; padding: 0;
+    color: #fff;
+    margin: 0; padding: 0;
     display: flex; flex-direction: column; align-items: center;
     min-height: 100vh;
   }
-  h1 { margin: 20px 0 10px; font-weight: 700; }
+  a.back-btn {
+    display: inline-block;
+    margin: 15px;
+    padding: 10px 20px;
+    background: #0077cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  h1 {
+    margin: 10px 0;
+    font-weight: 700;
+  }
   #game {
     display: grid;
     grid-template-columns: repeat(4, 70px);
-    grid-gap: 15px; margin-bottom: 20px;
+    grid-gap: 15px;
+    margin-bottom: 20px;
   }
   .card {
-    background: #48a868; border-radius: 12px;
-    width: 70px; height: 70px;
+    background: #48a868;
+    border-radius: 12px;
+    width: 70px;
+    height: 70px;
     display: flex; justify-content: center; align-items: center;
-    font-size: 40px; cursor: pointer;
+    font-size: 40px;
+    cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    user-select: none; transition: transform 0.3s;
+    user-select: none;
+    transition: transform 0.3s;
+    position: relative;
   }
   .card.flipped, .card.matched {
-    background: #ffcc00; color: #333;
-    cursor: default; transform: rotateY(180deg);
+    background: #ffcc00;
+    color: #333;
+    cursor: default;
+    transform: rotateY(180deg);
   }
-  .card.matched { background: #f39c12; box-shadow: 0 0 12px #f39c12; }
-  #info { font-size: 18px; margin-bottom: 30px; }
+  .card.matched {
+    background: #f39c12;
+    box-shadow: 0 0 12px #f39c12;
+  }
+  #info {
+    font-size: 18px;
+    margin-bottom: 30px;
+  }
   #restartBtn {
-    padding: 10px 25px; font-size: 16px;
-    background-color: #fff; color: #4ca2cd;
-    border: none; border-radius: 25px;
-    cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    padding: 10px 25px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #4ca2cd;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transition: background-color 0.3s;
   }
-  #restartBtn:hover { background-color: #f1c40f; color: #333; }
+  #restartBtn:hover {
+    background-color: #f1c40f;
+    color: #333;
+  }
   @media (max-width: 400px) {
-    #game { grid-template-columns: repeat(2, 90px); grid-gap: 20px; }
-    .card { width: 90px; height: 90px; font-size: 50px; }
-  }
-
-  /* Popup chung */
-  #popupForm, #resultPopup {
-    display: none;
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    align-items: center; justify-content: center;
-    z-index: 999;
-  }
-  .popup-box {
-    background: #fff; color: #333;
-    padding: 20px; border-radius: 12px;
-    text-align: center; width: 320px;
-  }
-  .popup-box h2 { margin-top: 0; }
-  .popup-box button {
-    margin-top: 15px; padding: 10px 20px;
-    background: #4ca2cd; border: none; border-radius: 6px;
-    color: #fff; cursor: pointer;
-  }
-  .popup-box input {
-    width: 90%; padding: 8px; margin: 6px 0;
-    border: 1px solid #ccc; border-radius: 6px;
+    #game {
+      grid-template-columns: repeat(2, 90px);
+      grid-gap: 20px;
+    }
+    .card {
+      width: 90px; height: 90px; font-size: 50px;
+    }
   }
 </style>
 </head>
 <body>
+
+<a href="index.html" class="back-btn">⬅ Quay lại menu</a>
 
 <h1>Mini Game Bắt Cặp</h1>
 <div id="info">Số lượt lật: 0</div>
 <div id="game"></div>
 <button id="restartBtn">Chơi lại</button>
 
-<!-- Popup nhập thông tin -->
-<div id="popupForm">
-  <div class="popup-box">
-    <h2>🎉 Chúc mừng bạn đã thắng!</h2>
-    <p>Vui lòng nhập thông tin để nhận quà tại quầy.</p>
-    <form id="winnerForm" method="POST" action="https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse" target="hidden_iframe">
-      <input type="text" name="entry.1410113608" placeholder="Số thứ tự" required />
-      <input type="text" name="entry.1256122884" placeholder="Tên" required />
-      <input type="text" name="entry.1376561036" placeholder="Số điện thoại" required />
-      <input type="hidden" name="entry.1497839970" id="hiddenFlips" />
-      <button type="submit">Gửi thông tin</button>
-    </form>
-  </div>
-</div>
-
-<!-- Popup kết quả -->
-<div id="resultPopup">
-  <div class="popup-box">
-    <h2 id="resultMessage"></h2>
-    <button onclick="closeResultPopup()">OK</button>
-  </div>
-</div>
-
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 <script>
   const emojis = ['🍎','🍌','🍓','🍇','🍉','🥝','🍒','🥥'];
-  let cards = [], flippedCards = [], matchedCount = 0, flips = 0;
+  let cards = [];
+  let flippedCards = [];
+  let matchedCount = 0;
+  let flips = 0;
 
   const game = document.getElementById('game');
   const info = document.getElementById('info');
   const restartBtn = document.getElementById('restartBtn');
-  const popupForm = document.getElementById('popupForm');
-  const hiddenFlips = document.getElementById('hiddenFlips');
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -120,7 +115,10 @@
   }
 
   function createCards() {
-    cards = []; flippedCards = []; matchedCount = 0; flips = 0;
+    cards = [];
+    flippedCards = [];
+    matchedCount = 0;
+    flips = 0;
     info.textContent = `Số lượt lật: ${flips}`;
     game.innerHTML = '';
 
@@ -156,18 +154,14 @@
         matchedCount += 2;
         flippedCards = [];
         if (matchedCount === cards.length) {
-          setTimeout(() => {
-            if (flips <= 32) {
-              hiddenFlips.value = flips;
-              popupForm.style.display = "flex";
-            } else {
-              showResultPopup(`😢 Bạn đã hoàn thành ${flips} lượt.\nHãy thử lại để đạt dưới 30 lượt nhé!`);
-            }
-          }, 300);
+          setTimeout(() => alert(`Chúc mừng! Bạn đã hoàn thành trong ${flips} lượt lật.`), 300);
         }
       } else {
         setTimeout(() => {
-          flippedCards.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; });
+          flippedCards.forEach(c => {
+            c.classList.remove('flipped');
+            c.textContent = '';
+          });
           flippedCards = [];
         }, 1000);
       }
@@ -175,30 +169,6 @@
   }
 
   restartBtn.addEventListener('click', createCards);
-
-  // Popup kết quả
-  function showResultPopup(message) {
-    document.getElementById("resultMessage").textContent = message;
-    document.getElementById("resultPopup").style.display = "flex";
-  }
-  function closeResultPopup() {
-    document.getElementById("resultPopup").style.display = "none";
-  }
-
-  // Xử lý gửi form
-  document.getElementById("winnerForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    fetch(this.action, { method: 'POST', body: new FormData(this), mode: 'no-cors' })
-      .then(() => {
-        popupForm.style.display = "none";
-        showResultPopup("🎉 Cảm ơn bạn đã tham gia!\nVui lòng đến quầy giao dịch để nhận quà sau khi hoàn tất giao dịch.");
-        createCards();
-      })
-      .catch(err => {
-        alert("Có lỗi xảy ra, vui lòng thử lại.");
-        console.error(err);
-      });
-  });
 
   createCards();
 </script>
