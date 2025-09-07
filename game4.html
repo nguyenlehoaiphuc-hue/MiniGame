@@ -5,25 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Game 4 - Đoán Chữ Đảo Lộn</title>
 <style>
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg,#004080,#00A1D6); color:#fff; margin:0; padding:10px; text-align:center; min-height:100vh;}
-  .controls { display:flex; gap:10px; margin-bottom:15px; justify-content:center; flex-wrap:wrap;}
-  .btn { padding:8px 16px; font-size:14px; background:#0077cc; color:#fff; border:none; border-radius:8px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2); text-decoration:none;}
-  .btn:hover { background:#005f99;}
-  .btn:disabled { background:#ccc; cursor:not-allowed;}
-  h1 { margin:10px 0; font-weight:700; color:#fff; font-size:24px;}
-  p.lead { color:#fff; font-size:1.2rem; font-weight:600; margin-bottom:10px;}
-  #scrambled, #answer { margin:15px auto; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; max-width:90%;}
-  .letter { width:36px; height:36px; line-height:36px; border:2px solid #0077cc; border-radius:6px; background:#0077cc; color:#fff; font-weight:bold; font-size:1.2rem; user-select:none; cursor:grab; touch-action: manipulation;}
-  .letter.dragging, .letter.touching { opacity:0.5; cursor:grabbing;}
-  .slot { width:36px; height:36px; border:2px dashed #ccc; border-radius:6px; vertical-align:middle;}
-  #result { margin-top:15px; font-size:1.3rem; font-weight:700;}
-  #form-container { display:none; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); margin:15px auto; max-width:90%; width:300px; flex-direction:column; align-items:center;}
-  #form-container h2 { color:#004080; margin-bottom:10px; font-size:18px;}
-  #form-container p { color:#333; margin-bottom:15px; font-size:14px;}
-  #form-container input { display:block; width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:6px; font-size:14px; box-sizing:border-box;}
-  #form-container button { background:#28a745; color:#fff; padding:8px 16px; font-size:14px; border:none; border-radius:6px; cursor:pointer;}
-  #form-container button:hover { background:#1e7e34;}
-  @media (max-width:400px){ .letter,.slot{width:32px;height:32px;line-height:32px;font-size:1rem;} .controls{gap:8px;} .btn{padding:6px 12px; font-size:12px;} h1{font-size:20px;} p.lead{font-size:1rem;} }
+body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#004080,#00A1D6);color:#fff;margin:0;padding:10px;text-align:center;min-height:100vh;}
+.controls{display:flex;gap:10px;margin-bottom:15px;justify-content:center;flex-wrap:wrap;}
+.btn{padding:8px 16px;font-size:14px;background:#0077cc;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.2);text-decoration:none;}
+.btn:hover{background:#005f99;}
+.btn:disabled{background:#ccc;cursor:not-allowed;}
+h1{margin:10px 0;font-weight:700;color:#fff;font-size:24px;}
+p.lead{color:#fff;font-size:1.2rem;font-weight:600;margin-bottom:10px;}
+#scrambled,#answer{margin:15px auto;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;max-width:90%;}
+.letter{width:36px;height:36px;line-height:36px;border:2px solid #0077cc;border-radius:6px;background:#0077cc;color:#fff;font-weight:bold;font-size:1.2rem;user-select:none;cursor:grab;touch-action:manipulation;}
+.letter.dragging,.letter.touching{opacity:0.5;cursor:grabbing;}
+.slot{width:36px;height:36px;border:2px dashed #ccc;border-radius:6px;vertical-align:middle;}
+#result{margin-top:15px;font-size:1.3rem;font-weight:700;}
+#form-container{display:none;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.2);margin:15px auto;max-width:90%;width:300px;flex-direction:column;align-items:center;}
+#form-container h2{color:#004080;margin-bottom:10px;font-size:18px;}
+#form-container p{color:#333;margin-bottom:15px;font-size:14px;}
+#form-container input{display:block;width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;}
+#form-container button{background:#28a745;color:#fff;padding:8px 16px;font-size:14px;border:none;border-radius:6px;cursor:pointer;}
+#form-container button:hover{background:#1e7e34;}
+@media(max-width:400px){.letter,.slot{width:32px;height:32px;line-height:32px;font-size:1rem;}.controls{gap:8px;}.btn{padding:6px 12px;font-size:12px;}h1{font-size:20px;}p.lead{font-size:1rem;}}
 </style>
 </head>
 <body>
@@ -48,10 +48,10 @@
 </div>
 
 <script>
-const words = ["TÀIKHOẢN","LÃISUẤT","THẺTÍNDỤNG","VAYVỐN","TIẾTKIỆM","CHUYỂNKHOẢN","ATM","NGÂNHÀNG","TÀICHÍNH","ĐẦUTƯ"];
-let currentWord = words[Math.floor(Math.random()*words.length)];
-let changeCount = 0;
-const maxChanges = 3;
+const words=["TÀIKHOẢN","LÃISUẤT","THẺTÍNDỤNG","VAYVỐN","TIẾTKIỆM","CHUYỂNKHOẢN","ATM","NGÂNHÀNG","TÀICHÍNH","ĐẦUTƯ"];
+let currentWord=words[Math.floor(Math.random()*words.length)];
+let changeCount=0;
+const maxChanges=3;
 const answerDiv=document.getElementById('answer');
 const scrambledDiv=document.getElementById('scrambled');
 const checkBtn=document.getElementById('checkBtn');
@@ -61,113 +61,101 @@ const formContainer=document.getElementById('form-container');
 const submitFormBtn=document.getElementById('submitFormBtn');
 let dragged=null;
 let touchElement=null;
+let touchClone=null;
 
 function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
 
 function initGame(){
-    touchElement=null; // reset biến khi init
+    touchElement=null; touchClone=null;
+    answerDiv.innerHTML=''; scrambledDiv.innerHTML=''; resultDiv.textContent=''; formContainer.style.display='none';
+    answerDiv.style.display='flex'; scrambledDiv.style.display='flex';
     const letters=currentWord.split('');
-    let scrambledLetters=[...letters];
-    shuffleArray(scrambledLetters);
-    answerDiv.innerHTML='';
-    scrambledDiv.innerHTML='';
-    resultDiv.textContent='';
-    formContainer.style.display='none';
-    answerDiv.style.display='flex';
-    scrambledDiv.style.display='flex';
-    for(let ch of letters){
-        const slot=document.createElement('div');
-        slot.classList.add('slot');
-        slot.dataset.correct=ch;
+    let scrambled=[...letters]; shuffleArray(scrambled);
+    letters.forEach(ch=>{
+        const slot=document.createElement('div'); slot.classList.add('slot'); slot.dataset.correct=ch;
         slot.addEventListener('dragover',e=>e.preventDefault());
         slot.addEventListener('drop',dropHandler);
         answerDiv.appendChild(slot);
-    }
-    for(let ch of scrambledLetters){
-        const letterDiv=document.createElement('div');
-        letterDiv.classList.add('letter');
-        letterDiv.textContent=ch;
-        letterDiv.draggable=true;
-        letterDiv.addEventListener('dragstart',dragStartHandler);
-        letterDiv.addEventListener('dragend',dragEndHandler);
-        letterDiv.addEventListener('touchstart',touchStartHandler);
-        letterDiv.addEventListener('touchmove',touchMoveHandler);
-        letterDiv.addEventListener('touchend',touchEndHandler);
-        scrambledDiv.appendChild(letterDiv);
-    }
+    });
+    scrambled.forEach(ch=>{
+        const letter=document.createElement('div'); letter.classList.add('letter'); letter.textContent=ch;
+        letter.draggable=true;
+        letter.addEventListener('dragstart',dragStartHandler);
+        letter.addEventListener('dragend',dragEndHandler);
+        letter.addEventListener('touchstart',touchStartHandler);
+        letter.addEventListener('touchmove',touchMoveHandler);
+        letter.addEventListener('touchend',touchEndHandler);
+        scrambledDiv.appendChild(letter);
+    });
 }
 
+// ----- PC Drag & Drop -----
 function dragStartHandler(e){dragged=e.target;e.target.classList.add('dragging');}
 function dragEndHandler(e){e.target.classList.remove('dragging');dragged=null;}
 function dropHandler(e){e.preventDefault();if(e.target.classList.contains('slot')&&!e.target.hasChildNodes()&&dragged){e.target.appendChild(dragged);}}
 
+// ----- Mobile Touch Drag -----
 function touchStartHandler(e){
     if(e.target.classList.contains('letter')){
         touchElement=e.target;
+        touchClone=touchElement.cloneNode(true);
+        touchClone.style.position='absolute';
+        touchClone.style.zIndex=1000;
+        touchClone.style.pointerEvents='none';
         const rect=touchElement.getBoundingClientRect();
-        touchElement.offsetX=e.touches[0].clientX-rect.left;
-        touchElement.offsetY=e.touches[0].clientY-rect.top;
-        touchElement.style.position='absolute';
-        touchElement.style.zIndex=1000;
-        document.body.appendChild(touchElement);
+        touchClone.startX=rect.left; touchClone.startY=rect.top;
+        touchClone.offsetX=e.touches[0].clientX-rect.left;
+        touchClone.offsetY=e.touches[0].clientY-rect.top;
+        document.body.appendChild(touchClone);
+        touchElement.style.visibility='hidden';
     }
 }
-
 function touchMoveHandler(e){
-    if(touchElement){e.preventDefault();const touch=e.touches[0];touchElement.style.left=(touch.clientX-touchElement.offsetX)+'px';touchElement.style.top=(touch.clientY-touchElement.offsetY)+'px';}
+    if(touchClone){e.preventDefault(); const touch=e.touches[0]; touchClone.style.left=(touch.clientX-touchClone.offsetX)+'px'; touchClone.style.top=(touch.clientY-touchClone.offsetY)+'px';}
 }
-
 function touchEndHandler(e){
-    if(!touchElement) return;
+    if(!touchElement||!touchClone) return;
     const touch=e.changedTouches[0];
     const target=document.elementFromPoint(touch.clientX,touch.clientY);
-    if(target && target.classList.contains('slot') && !target.hasChildNodes()){
-        target.appendChild(touchElement);
-    } else { scrambledDiv.appendChild(touchElement); }
-    touchElement.style.position='static';
-    touchElement.style.left='';
-    touchElement.style.top='';
-    touchElement.style.zIndex='';
-    touchElement=null;
+    if(target&&target.classList.contains('slot')&&!target.hasChildNodes()){target.appendChild(touchElement);}
+    else{scrambledDiv.appendChild(touchElement);}
+    touchElement.style.visibility='visible';
+    document.body.removeChild(touchClone);
+    touchElement=null; touchClone=null;
 }
 
+// ----- Check Result -----
 function checkResult(){
-    const slots=answerDiv.querySelectorAll('.slot');
-    let correct=true;
+    const slots=answerDiv.querySelectorAll('.slot'); let correct=true;
     for(let slot of slots){
-        const ch=slot.dataset.correct;
-        if(!slot.firstChild){ resultDiv.style.color='#ff0000'; resultDiv.textContent='⚠️ Chưa điền đủ chữ cái!'; return;}
-        if(slot.firstChild.textContent!==ch){ correct=false; break;}
+        if(!slot.firstChild){resultDiv.style.color='#ff0000'; resultDiv.textContent='⚠️ Chưa điền đủ chữ cái!'; return;}
+        if(slot.firstChild.textContent!==slot.dataset.correct){correct=false; break;}
     }
     if(correct){
         resultDiv.style.color='#28a745';
         resultDiv.textContent='🎉 Chúc mừng! Bạn đã sắp xếp đúng từ.';
         formContainer.style.display='flex';
-        answerDiv.style.display='none';
-        scrambledDiv.style.display='none';
-        checkBtn.style.display='none';
-        changeWordBtn.style.display='none';
-    } else {
-        resultDiv.style.color='#ff0000';
-        resultDiv.textContent='❌ Chưa đúng! Hãy thử lại.';
-    }
+        answerDiv.style.display='none'; scrambledDiv.style.display='none';
+        checkBtn.style.display='none'; changeWordBtn.style.display='none';
+    } else { resultDiv.style.color='#ff0000'; resultDiv.textContent='❌ Chưa đúng! Hãy thử lại.';}
 }
 
+// ----- Change Word -----
 function changeWord(){
     if(changeCount>=maxChanges){alert('Bạn đã hết số lần đổi từ!'); changeWordBtn.disabled=true; return;}
-    changeCount++;
-    currentWord=words[Math.floor(Math.random()*words.length)];
+    changeCount++; currentWord=words[Math.floor(Math.random()*words.length)];
     initGame();
     changeWordBtn.textContent=`Đổi từ (${maxChanges-changeCount} lần còn lại)`;
     if(changeCount>=maxChanges) changeWordBtn.disabled=true;
 }
 
+// ----- Submit Form -----
 function submitForm(){
     const serial=document.getElementById('serial').value;
     const name=document.getElementById('name').value;
     const email=document.getElementById('email').value;
     const phone=document.getElementById('phone').value;
-    if(!serial||!name||!email||!phone){alert('Vui lòng điền đầy đủ thông tin!');return;}
+    if(!serial||!name||!email||!phone){alert('Vui lòng điền đầy đủ thông tin!'); return;}
     if(!serial.match(/^[A-Za-z0-9]+$/)){alert('Số thứ tự chỉ chứa chữ cái và số!'); return;}
     if(!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)){alert('Email không hợp lệ!'); return;}
     if(!phone.match(/^\d{10,11}$/)){alert('Số điện thoại phải 10-11 chữ số!'); return;}
@@ -177,21 +165,11 @@ function submitForm(){
     formData.append('entry.1376561036',phone);
     formData.append('entry.1497839970','Thắng');
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse',{
-        method:'POST',
-        body:formData,
-        mode:'no-cors'
-    }).then(()=>{
-        alert('Thông tin đã được gửi! Cảm ơn bạn.');
-        formContainer.style.display='none';
-        changeCount=0;
-        changeWordBtn.disabled=false;
-        changeWordBtn.textContent=`Đổi từ (${maxChanges} lần còn lại)`;
-        checkBtn.style.display='inline-block';
-        currentWord=words[Math.floor(Math.random()*words.length)];
-        initGame();
-    });
+        method:'POST', body:formData, mode:'no-cors'
+    }).then(()=>{alert('Thông tin đã được gửi!'); formContainer.style.display='none'; changeCount=0; changeWordBtn.disabled=false; changeWordBtn.textContent=`Đổi từ (${maxChanges} lần còn lại)`; checkBtn.style.display='inline-block'; currentWord=words[Math.floor(Math.random()*words.length)]; initGame();});
 }
 
+// ----- Event Listeners -----
 checkBtn.addEventListener('click',checkResult);
 changeWordBtn.addEventListener('click',changeWord);
 submitFormBtn.addEventListener('click',submitForm);
