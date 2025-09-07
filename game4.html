@@ -191,7 +191,6 @@
     "THUẾ", "PHÍDỊCHVỤ", "LÃISUẤTCỐĐỊNH", "LÃISUẤTTHẢNỔI", "VAYMUANHÀ",
     "THANHTOÁN"
   ];
-
   let currentWord = words[Math.floor(Math.random() * words.length)];
   let changeCount = 0;
   const maxChanges = 3;
@@ -331,7 +330,7 @@
     if (correct) {
       resultDiv.style.color = '#28a745';
       resultDiv.textContent = '🎉 Chúc mừng! Bạn đã sắp xếp đúng từ.';
-      formContainer.style.display = 'flex';
+      formContainer.style.display = 'flex';  // Hiện form khi thắng
       answerDiv.style.display = 'none';
       scrambledDiv.style.display = 'none';
       checkBtn.style.display = 'none';
@@ -387,14 +386,14 @@
     formData.append('entry.1410113608', serial);
     formData.append('entry.1256122884', name);
     formData.append('entry.1376561036', phone);
-    formData.append('entry.1497839970', 'Thắng');
+    formData.append('entry.1497839970', 'Thắng'); // Kết quả cố định
 
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
     }).then(() => {
-      alert('Thông tin đã được gửi!');
+      alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
       formContainer.style.display = 'none';
       changeCount = 0;
       changeWordBtn.disabled = false;
