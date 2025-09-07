@@ -143,6 +143,7 @@
   <div id="form-container">
     <h2>🎉 Chúc mừng bạn đã thắng!</h2>
     <p>Vui lòng nhập thông tin để nhận quà:</p>
+    <input type="text" id="serial" placeholder="Số thứ tự (bốc tại quầy)" required>
     <input type="text" id="name" placeholder="Họ và tên" required>
     <input type="email" id="email" placeholder="Email" required>
     <input type="tel" id="phone" placeholder="Số điện thoại" required>
@@ -228,19 +229,39 @@
   }
 
   function submitForm() {
+    const serial = document.getElementById('serial').value;
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
-    if (!name || !email || !phone) {
-      alert('Vui lòng điền đầy đủ thông tin!');
+
+    if (!serial || !name || !email || !phone) {
+      alert('Vui lòng điền đầy đủ thông tin, bao gồm Số thứ tự!');
+      return;
+    }
+
+    // Kiểm tra định dạng Số thứ tự (chỉ chấp nhận chữ cái và số)
+    if (!serial.match(/^[A-Za-z0-9]+$/)) {
+      alert('Số thứ tự chỉ được chứa chữ cái và số (ví dụ: A123 hoặc 123)!');
+      return;
+    }
+
+    // Kiểm tra định dạng email
+    if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+      alert('Email không hợp lệ!');
+      return;
+    }
+
+    // Kiểm tra định dạng số điện thoại (10-11 chữ số)
+    if (!phone.match(/^\d{10,11}$/)) {
+      alert('Số điện thoại phải có 10-11 chữ số!');
       return;
     }
 
     const formData = new FormData();
-    formData.append('entry.1410113608', new Date().getTime()); // Số thứ tự (dùng timestamp)
+    formData.append('entry.1410113608', serial); // Số thứ tự
     formData.append('entry.1256122884', name); // Họ tên
     formData.append('entry.1376561036', phone); // Số điện thoại
-    formData.append('entry.1497839970', 'Bắt Cặp'); // Kết quả (tên game)
+    formData.append('entry.1497839970', 'Bắt Cặp'); // Kết quả
 
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
