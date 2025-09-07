@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game 2 - Đoán Số</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #004080, #00A1D6);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: #005f99;
+  }
+  h1 {
+    margin: 10px 0;
+    font-weight: 700;
+    color: #fff;
+  }
+  #game-container {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+  }
+  input[type="number"] {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: none;
+    text-align: center;
+    width: 100px;
+    margin: 10px 0;
+  }
+  #message {
+    margin: 15px 0;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  #form-container {
+    display: none;
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    max-width: 400px;
+    width: 90%;
+  }
+  #form-container input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  #form-container button {
+    background: #28a745;
+    color: #fff;
+  }
+  #form-container button:hover {
+    background: #1e7e34;
+  }
+</style>
+</head>
+<body>
+  <div class="controls">
+    <a href="index.html" class="btn">⬅ Quay lại menu</a>
+    <button id="restartBtn" class="btn">Chơi lại</button>
+  </div>
+  <h1>Mini Game Đoán Số</h1>
+  <div id="game-container">
+    <p>Mình đã chọn 1 số từ <b>1 đến 100</b>. Bạn đoán thử nhé!</p>
+    <input type="number" id="guessInput" placeholder="Nhập số" min="1" max="100" />
+    <br/>
+    <button id="guessBtn" class="btn">Đoán</button>
+    <div id="message"></div>
+    <div id="attempts">Số lượt còn lại: 7</div>
+  </div>
+  <div id="form-container">
+    <h2>🎉 Chúc mừng bạn đã thắng!</h2>
+    <p>Vui lòng nhập thông tin để nhận quà:</p>
+    <input type="text" id="name" placeholder="Họ và tên" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Số điện thoại" required>
+    <button id="submitFormBtn" class="btn">Gửi thông tin</button>
+  </div>
+<script>
+  let secretNumber;
+  let attemptsLeft;
+
+  const guessInput = document.getElementById('guessInput');
+  const guessBtn = document.getElementById('guessBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const message = document.getElementById('message');
+  const attempts = document.getElementById('attempts');
+  const formContainer = document.getElementById('form-container');
+  const submitFormBtn = document.getElementById('submitFormBtn');
+
+  function startGame() {
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    attemptsLeft = 7;
+    message.textContent = '';
+    attempts.textContent = `Số lượt còn lại: ${attemptsLeft}`;
+    guessInput.value = '';
+    guessBtn.style.display = 'inline-block';
+    restartBtn.style.display = 'inline-block';
+    formContainer.style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+  }
+
+  function checkGuess() {
+    const guess = parseInt(guessInput.value);
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+      message.textContent = '⚠️ Vui lòng nhập số từ 1 đến 100!';
+      return;
+    }
+
+    attemptsLeft--;
+    if (guess === secretNumber) {
+      message.textContent = `🎉 Chúc mừng! Bạn đã đoán đúng số ${secretNumber}!`;
+      formContainer.style.display = 'block';
+      document.getElementById('game-container').style.display = 'none';
+    } else if (attemptsLeft <= 0) {
+      message.textContent = `😢 Hết lượt! Số đúng là ${secretNumber}.`;
+      guessBtn.style.display = 'none';
+    } else if (guess < secretNumber) {
+      message.textContent = '⬆️ Số bạn đoán nhỏ quá! Thử số lớn hơn.';
+    } else {
+      message.textContent = '⬇️ Số bạn đoán lớn quá! Thử số nhỏ hơn.';
+    }
+
+    attempts.textContent = `Số lượt còn lại: ${attemptsLeft}`;
+  }
+
+  function submitForm() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    if (!name || !email || !phone) {
+      alert('Vui lòng điền đầy đủ thông tin!');
+      return;
+    }
+    const data = { name, email, phone, game: 'Đoán Số', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
+    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+        formContainer.style.display = 'none';
+        startGame();
+      } else {
+        alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
+      }
+    })
+    .catch(error => {
+      alert('Lỗi kết nối: ' + error.message);
+    });
+  }
+
+  guessBtn.addEventListener('click', checkGuess);
+  restartBtn.addEventListener('click', startGame);
+  submitFormBtn.addEventListener('click', submitForm);
+
+  startGame();
+</script>
+</body>
+</html>
