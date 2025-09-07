@@ -10,19 +10,20 @@
     background: linear-gradient(135deg, #004080, #00A1D6);
     color: #fff;
     margin: 0;
-    padding: 20px;
+    padding: 10px;
     text-align: center;
     min-height: 100vh;
   }
   .controls {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     justify-content: center;
+    flex-wrap: wrap;
   }
   .btn {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     background: #0077cc;
     color: #fff;
     border: none;
@@ -42,93 +43,117 @@
     margin: 10px 0;
     font-weight: 700;
     color: #fff;
+    font-size: 24px;
   }
   p.lead {
     color: #fff;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   #scrambled, #answer {
-    margin: 20px auto;
+    margin: 15px auto;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    max-width: 500px;
+    max-width: 90%;
   }
   .letter {
-    width: 44px;
-    height: 44px;
-    line-height: 44px;
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
     border: 2px solid #0077cc;
     border-radius: 6px;
     background-color: #0077cc;
     color: #fff;
     font-weight: bold;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     user-select: none;
     cursor: grab;
+    touch-action: manipulation;
   }
-  .letter.dragging {
+  .letter.dragging, .letter.touching {
     opacity: 0.5;
     cursor: grabbing;
   }
   .slot {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     border: 2px dashed #ccc;
     border-radius: 6px;
     vertical-align: middle;
   }
   #result {
-    margin-top: 20px;
-    font-size: 1.5rem;
+    margin-top: 15px;
+    font-size: 1.3rem;
     font-weight: 700;
   }
   #form-container {
     display: none;
     background: #fff;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 20px;
+    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    margin: 20px auto;
-    max-width: 500px;
-    width: 90%;
+    margin: 15px auto;
+    max-width: 90%;
+    width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
   #form-container h2 {
     color: #004080;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    font-size: 18px;
   }
   #form-container p {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 14px;
   }
   #form-container input {
     display: block;
     width: 100%;
-    max-width: 400px;
-    padding: 12px;
-    margin: 10px 0;
+    padding: 10px;
+    margin: 8px 0;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 6px;
+    font-size: 14px;
     box-sizing: border-box;
   }
   #form-container button {
     background: #28a745;
     color: #fff;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
   }
   #form-container button:hover {
     background: #1e7e34;
+  }
+  @media (max-width: 400px) {
+    .letter, .slot {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 1rem;
+    }
+    .controls {
+      gap: 8px;
+    }
+    .btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    p.lead {
+      font-size: 1rem;
+    }
   }
 </style>
 </head>
@@ -139,7 +164,7 @@
     <button id="checkBtn" class="btn">Kiểm tra kết quả</button>
   </div>
   <h1>🎲 Game 4: Đoán Chữ Đảo Lộn</h1>
-  <p class="lead">Kéo các chữ cái vào ô trống đúng vị trí để tạo thành từ chính xác.</p>
+  <p class="lead">Kéo hoặc chạm và thả các chữ cái vào ô trống để tạo từ đúng.</p>
   <div id="answer"></div>
   <div id="scrambled"></div>
   <div id="result"></div>
@@ -203,6 +228,7 @@
       slot.dataset.correct = ch;
       slot.addEventListener('dragover', (e) => e.preventDefault());
       slot.addEventListener('drop', dropHandler);
+      slot.addEventListener('touchstart', touchStartHandler);
       answerDiv.appendChild(slot);
     }
 
@@ -213,11 +239,16 @@
       letterDiv.draggable = true;
       letterDiv.addEventListener('dragstart', dragStartHandler);
       letterDiv.addEventListener('dragend', dragEndHandler);
+      letterDiv.addEventListener('touchstart', touchStartHandler);
+      letterDiv.addEventListener('touchmove', touchMoveHandler);
+      letterDiv.addEventListener('touchend', touchEndHandler);
       scrambledDiv.appendChild(letterDiv);
     }
   }
 
-  let dragged;
+  let dragged = null;
+  let touchElement = null;
+  let touchClone = null;
 
   function dragStartHandler(e) {
     dragged = e.target;
@@ -225,11 +256,46 @@
   }
   function dragEndHandler(e) {
     e.target.classList.remove('dragging');
+    dragged = null;
   }
   function dropHandler(e) {
     e.preventDefault();
-    if (e.target.classList.contains('slot') && !e.target.hasChildNodes()) {
+    if (e.target.classList.contains('slot') && !e.target.hasChildNodes() && dragged) {
       e.target.appendChild(dragged);
+    }
+  }
+
+  function touchStartHandler(e) {
+    if (e.target.classList.contains('letter')) {
+      touchElement = e.target;
+      touchElement.classList.add('touching');
+      touchClone = touchElement.cloneNode(true);
+      touchClone.style.position = 'absolute';
+      touchClone.style.pointerEvents = 'none';
+      document.body.appendChild(touchClone);
+    }
+  }
+
+  function touchMoveHandler(e) {
+    if (touchElement && touchClone) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchClone.style.left = `${touch.clientX - touchClone.offsetWidth / 2}px`;
+      touchClone.style.top = `${touch.clientY - touchClone.offsetHeight / 2}px`;
+    }
+  }
+
+  function touchEndHandler(e) {
+    if (touchElement && touchClone) {
+      touchElement.classList.remove('touching');
+      document.body.removeChild(touchClone);
+      const touch = e.changedTouches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target && target.classList.contains('slot') && !target.hasChildNodes()) {
+        target.appendChild(touchElement);
+      }
+      touchElement = null;
+      touchClone = null;
     }
   }
 
@@ -252,7 +318,7 @@
     if (correct) {
       resultDiv.style.color = '#28a745';
       resultDiv.textContent = '🎉 Chúc mừng! Bạn đã sắp xếp đúng từ.';
-      formContainer.style.display = 'flex';
+      formContainer.style.display Darkening
       answerDiv.style.display = 'none';
       scrambledDiv.style.display = 'none';
       checkBtn.style.display = 'none';
@@ -311,7 +377,7 @@
     formData.append('entry.1410113608', serial); // Số thứ tự
     formData.append('entry.1256122884', name); // Họ tên
     formData.append('entry.1376561036', phone); // Số điện thoại
-    formData.append('entry.1497839970', 'Đoán Chữ'); // Kết quả
+    formData.append('entry.1497839970', 'Thắng'); // Kết quả
 
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
