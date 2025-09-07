@@ -285,29 +285,30 @@
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
-    const data = { name, email, phone, game: 'Đoán Chữ', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
-    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+
+    const formData = new FormData();
+    formData.append('entry.1410113608', new Date().getTime()); // Số thứ tự
+    formData.append('entry.1256122884', name); // Họ tên
+    formData.append('entry.1376561036', phone); // Số điện thoại
+    formData.append('entry.1497839970', 'Đoán Chữ'); // Kết quả
+
+    fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' }
+      body: formData,
+      mode: 'no-cors'
     })
-    .then(response => response.json())
-    .then(result => {
-      if (result.status === 'success') {
-        alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
-        formContainer.style.display = 'none';
-        changeCount = 0;
-        changeWordBtn.disabled = false;
-        changeWordBtn.textContent = `Đổi từ (${maxChanges} lần còn lại)`;
-        checkBtn.style.display = 'inline-block';
-        currentWord = words[Math.floor(Math.random() * words.length)];
-        initGame();
-      } else {
-        alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
-      }
+    .then(() => {
+      alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+      formContainer.style.display = 'none';
+      changeCount = 0;
+      changeWordBtn.disabled = false;
+      changeWordBtn.textContent = `Đổi từ (${maxChanges} lần còn lại)`;
+      checkBtn.style.display = 'inline-block';
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      initGame();
     })
     .catch(error => {
-      alert('Lỗi kết nối: ' + error.message);
+      alert('Lỗi khi gửi thông tin: ' + error.message);
     });
   }
 
