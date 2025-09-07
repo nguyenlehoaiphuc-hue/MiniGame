@@ -6,27 +6,39 @@
 <title>Game 1 - Mini Game Bắt Cặp</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #67B26F, #4ca2cd);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #004080, #00A1D6);
     color: #fff;
-    margin: 0; padding: 0;
-    display: flex; flex-direction: column; align-items: center;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
   }
-  a.back-btn {
-    display: inline-block;
-    margin: 15px;
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .btn {
     padding: 10px 20px;
+    font-size: 16px;
     background: #0077cc;
     color: #fff;
-    text-decoration: none;
+    border: none;
     border-radius: 8px;
-    font-weight: bold;
+    cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: #005f99;
   }
   h1 {
     margin: 10px 0;
     font-weight: 700;
+    color: #fff;
   }
   #game {
     display: grid;
@@ -35,11 +47,13 @@
     margin-bottom: 20px;
   }
   .card {
-    background: #48a868;
+    background: #28a745;
     border-radius: 12px;
     width: 70px;
     height: 70px;
-    display: flex; justify-content: center; align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 40px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -61,20 +75,31 @@
     font-size: 18px;
     margin-bottom: 30px;
   }
-  #restartBtn {
-    padding: 10px 25px;
-    font-size: 16px;
-    background-color: #fff;
-    color: #4ca2cd;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    transition: background-color 0.3s;
+  #form-container {
+    display: none;
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    max-width: 400px;
+    width: 90%;
   }
-  #restartBtn:hover {
-    background-color: #f1c40f;
-    color: #333;
+  #form-container input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  #form-container button {
+    background: #28a745;
+    color: #fff;
+  }
+  #form-container button:hover {
+    background: #1e7e34;
   }
   @media (max-width: 400px) {
     #game {
@@ -82,20 +107,29 @@
       grid-gap: 20px;
     }
     .card {
-      width: 90px; height: 90px; font-size: 50px;
+      width: 90px;
+      height: 90px;
+      font-size: 50px;
     }
   }
 </style>
 </head>
 <body>
-
-<a href="index.html" class="back-btn">⬅ Quay lại menu</a>
-
-<h1>Mini Game Bắt Cặp</h1>
-<div id="info">Số lượt lật: 0</div>
-<div id="game"></div>
-<button id="restartBtn">Chơi lại</button>
-
+  <div class="controls">
+    <a href="index.html" class="btn">⬅ Quay lại menu</a>
+    <button id="restartBtn" class="btn">Chơi lại</button>
+  </div>
+  <h1>Mini Game Bắt Cặp</h1>
+  <div id="info">Số lượt lật: 0</div>
+  <div id="game"></div>
+  <div id="form-container">
+    <h2>🎉 Chúc mừng bạn đã thắng!</h2>
+    <p>Vui lòng nhập thông tin để nhận quà:</p>
+    <input type="text" id="name" placeholder="Họ và tên" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Số điện thoại" required>
+    <button id="submitFormBtn" class="btn">Gửi thông tin</button>
+  </div>
 <script>
   const emojis = ['🍎','🍌','🍓','🍇','🍉','🥝','🍒','🥥'];
   let cards = [];
@@ -106,6 +140,8 @@
   const game = document.getElementById('game');
   const info = document.getElementById('info');
   const restartBtn = document.getElementById('restartBtn');
+  const formContainer = document.getElementById('form-container');
+  const submitFormBtn = document.getElementById('submitFormBtn');
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -121,6 +157,7 @@
     flips = 0;
     info.textContent = `Số lượt lật: ${flips}`;
     game.innerHTML = '';
+    formContainer.style.display = 'none';
 
     let cardEmojis = [...emojis, ...emojis];
     shuffle(cardEmojis);
@@ -154,7 +191,11 @@
         matchedCount += 2;
         flippedCards = [];
         if (matchedCount === cards.length) {
-          setTimeout(() => alert(`Chúc mừng! Bạn đã hoàn thành trong ${flips} lượt lật.`), 300);
+          setTimeout(() => {
+            formContainer.style.display = 'block';
+            game.style.display = 'none';
+            info.style.display = 'none';
+          }, 300);
         }
       } else {
         setTimeout(() => {
@@ -168,10 +209,41 @@
     }
   }
 
+  function submitForm() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    if (!name || !email || !phone) {
+      alert('Vui lòng điền đầy đủ thông tin!');
+      return;
+    }
+    const data = { name, email, phone, game: 'Bắt Cặp', timestamp: new Date().toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}) };
+    fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+        formContainer.style.display = 'none';
+        createCards();
+        game.style.display = 'grid';
+        info.style.display = 'block';
+      } else {
+        alert('Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại.');
+      }
+    })
+    .catch(error => {
+      alert('Lỗi kết nối: ' + error.message);
+    });
+  }
+
   restartBtn.addEventListener('click', createCards);
+  submitFormBtn.addEventListener('click', submitForm);
 
   createCards();
 </script>
-
 </body>
 </html>
