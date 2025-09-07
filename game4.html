@@ -191,6 +191,7 @@
     "THUẾ", "PHÍDỊCHVỤ", "LÃISUẤTCỐĐỊNH", "LÃISUẤTTHẢNỔI", "VAYMUANHÀ",
     "THANHTOÁN"
   ];
+
   let currentWord = words[Math.floor(Math.random() * words.length)];
   let changeCount = 0;
   const maxChanges = 3;
@@ -226,9 +227,8 @@
       const slot = document.createElement('div');
       slot.classList.add('slot');
       slot.dataset.correct = ch;
-      slot.addEventListener('dragover', (e) => e.preventDefault());
+      slot.addEventListener('dragover', e => e.preventDefault());
       slot.addEventListener('drop', dropHandler);
-      slot.addEventListener('touchstart', touchStartHandler);
       answerDiv.appendChild(slot);
     }
 
@@ -248,8 +248,8 @@
 
   let dragged = null;
   let touchElement = null;
-  let touchClone = null;
 
+  // ----- PC drag & drop -----
   function dragStartHandler(e) {
     dragged = e.target;
     e.target.classList.add('dragging');
@@ -265,48 +265,61 @@
     }
   }
 
+  // ----- Mobile touch drag & drop -----
   function touchStartHandler(e) {
     if (e.target.classList.contains('letter')) {
       touchElement = e.target;
-      touchElement.classList.add('touching');
-      touchClone = touchElement.cloneNode(true);
-      touchClone.style.position = 'absolute';
-      touchClone.style.pointerEvents = 'none';
-      document.body.appendChild(touchClone);
+      const rect = touchElement.getBoundingClientRect();
+      touchElement.startX = rect.left;
+      touchElement.startY = rect.top;
+      touchElement.offsetX = e.touches[0].clientX - rect.left;
+      touchElement.offsetY = e.touches[0].clientY - rect.top;
+      touchElement.style.position = 'absolute';
+      touchElement.style.zIndex = 1000;
+      document.body.appendChild(touchElement);
     }
   }
 
   function touchMoveHandler(e) {
-    if (touchElement && touchClone) {
+    if (touchElement) {
       e.preventDefault();
       const touch = e.touches[0];
-      touchClone.style.left = `${touch.clientX - touchClone.offsetWidth / 2}px`;
-      touchClone.style.top = `${touch.clientY - touchClone.offsetHeight / 2}px`;
+      touchElement.style.left = (touch.clientX - touchElement.offsetX) + 'px';
+      touchElement.style.top = (touch.clientY - touchElement.offsetY) + 'px';
     }
   }
 
   function touchEndHandler(e) {
-    if (touchElement && touchClone) {
-      touchElement.classList.remove('touching');
-      document.body.removeChild(touchClone);
-      const touch = e.changedTouches[0];
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (target && target.classList.contains('slot') && !target.hasChildNodes()) {
-        target.appendChild(touchElement);
-      }
-      touchElement = null;
-      touchClone = null;
+    if (!touchElement) return;
+    const touch = e.changedTouches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (target && target.classList.contains('slot') && !target.hasChildNodes()) {
+      target.appendChild(touchElement);
+      touchElement.style.position = 'static';
+      touchElement.style.left = '';
+      touchElement.style.top = '';
+      touchElement.style.zIndex = '';
+    } else {
+      scrambledDiv.appendChild(touchElement);
+      touchElement.style.position = 'static';
+      touchElement.style.left = '';
+      touchElement.style.top = '';
+      touchElement.style.zIndex = '';
     }
+    touchElement = null;
   }
 
+  // ----- Check result -----
   function checkResult() {
-    let correct = true;
     const slots = answerDiv.querySelectorAll('.slot');
+    let correct = true;
+
     for (let slot of slots) {
       const ch = slot.dataset.correct;
       if (!slot.firstChild) {
         resultDiv.style.color = '#ff0000';
-        resultDiv.textContent = '⚠️ Chưa điền đủ chữ cái vào các ô. Vui lòng kéo đầy đủ!';
+        resultDiv.textContent = '⚠️ Chưa điền đủ chữ cái vào các ô!';
         return;
       }
       if (slot.firstChild.textContent !== ch) {
@@ -318,7 +331,7 @@
     if (correct) {
       resultDiv.style.color = '#28a745';
       resultDiv.textContent = '🎉 Chúc mừng! Bạn đã sắp xếp đúng từ.';
-      formContainer.style.display Darkening
+      formContainer.style.display = 'flex';
       answerDiv.style.display = 'none';
       scrambledDiv.style.display = 'none';
       checkBtn.style.display = 'none';
@@ -329,6 +342,7 @@
     }
   }
 
+  // ----- Change word -----
   function changeWord() {
     if (changeCount >= maxChanges) {
       alert('Bạn đã sử dụng hết số lần đổi từ!');
@@ -339,11 +353,10 @@
     currentWord = words[Math.floor(Math.random() * words.length)];
     initGame();
     changeWordBtn.textContent = `Đổi từ (${maxChanges - changeCount} lần còn lại)`;
-    if (changeCount >= maxChanges) {
-      changeWordBtn.disabled = true;
-    }
+    if (changeCount >= maxChanges) changeWordBtn.disabled = true;
   }
 
+  // ----- Submit form -----
   function submitForm() {
     const serial = document.getElementById('serial').value;
     const name = document.getElementById('name').value;
@@ -351,41 +364,37 @@
     const phone = document.getElementById('phone').value;
 
     if (!serial || !name || !email || !phone) {
-      alert('Vui lòng điền đầy đủ thông tin, bao gồm Số thứ tự!');
+      alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
 
-    // Kiểm tra định dạng Số thứ tự (chỉ chấp nhận chữ cái và số)
     if (!serial.match(/^[A-Za-z0-9]+$/)) {
-      alert('Số thứ tự chỉ được chứa chữ cái và số (ví dụ: A123 hoặc 123)!');
+      alert('Số thứ tự chỉ chứa chữ cái và số!');
       return;
     }
 
-    // Kiểm tra định dạng email
     if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
       alert('Email không hợp lệ!');
       return;
     }
 
-    // Kiểm tra định dạng số điện thoại (10-11 chữ số)
     if (!phone.match(/^\d{10,11}$/)) {
-      alert('Số điện thoại phải có 10-11 chữ số!');
+      alert('Số điện thoại phải 10-11 chữ số!');
       return;
     }
 
     const formData = new FormData();
-    formData.append('entry.1410113608', serial); // Số thứ tự
-    formData.append('entry.1256122884', name); // Họ tên
-    formData.append('entry.1376561036', phone); // Số điện thoại
-    formData.append('entry.1497839970', 'Thắng'); // Kết quả
+    formData.append('entry.1410113608', serial);
+    formData.append('entry.1256122884', name);
+    formData.append('entry.1376561036', phone);
+    formData.append('entry.1497839970', 'Thắng');
 
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSceII5vCUUPT5BHklId4o1DVJRHpIGP6M_PFLwluQ5Ksl5NNw/formResponse', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
-    })
-    .then(() => {
-      alert('Thông tin đã được gửi! Cảm ơn bạn đã tham gia.');
+    }).then(() => {
+      alert('Thông tin đã được gửi!');
       formContainer.style.display = 'none';
       changeCount = 0;
       changeWordBtn.disabled = false;
@@ -393,9 +402,6 @@
       checkBtn.style.display = 'inline-block';
       currentWord = words[Math.floor(Math.random() * words.length)];
       initGame();
-    })
-    .catch(error => {
-      alert('Lỗi khi gửi thông tin: ' + error.message);
     });
   }
 
